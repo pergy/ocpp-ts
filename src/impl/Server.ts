@@ -10,9 +10,9 @@ import { OcppClientConnection } from '../OcppClientConnection';
 import { Protocol } from './Protocol';
 
 export class Server extends EventEmitter {
-  private server: WebSocket.Server | null = null;
-
-  private clients: Array<Client> = [];
+  server: WebSocket.Server | null = null;
+  clients: Array<Client> = [];
+  port: number | null = null;
 
   protected listen(port = 9220, options?: SecureContextOptions) {
     let server;
@@ -22,12 +22,15 @@ export class Server extends EventEmitter {
       server = createHttpServer();
     }
 
+    this.port = port
     const wss = new WebSocketServer({
       noServer: true,
       handleProtocols: (protocols: Set<string>) => {
+        console.log('[wss] handle protocol requested', protocols)
         if (protocols.has(OCPP_PROTOCOL_1_6)) {
           return OCPP_PROTOCOL_1_6;
         }
+        console.log('[wss] no valid protocol')
         return false;
       },
     });
@@ -35,23 +38,31 @@ export class Server extends EventEmitter {
     wss.on('connection', (ws, req) => this.onNewConnection(ws, req));
 
     server.on('upgrade', (req: IncomingMessage, socket: stream.Duplex, head: Buffer) => {
+      console.log('[HTTP] upgrade requested', req.url)
       const cpId = Server.getCpIdFromUrl(req.url);
+      console.log('[HTTP] extracted id', cpId)
       if (!cpId) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
         socket.destroy();
       } else if (this.listenerCount('authorization')) {
+        console.log('[Server] authorization callback')
         this.emit('authorization', cpId, req, (err?: Error) => {
           if (err) {
             socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
             socket.destroy();
           } else {
+            console.log('[Server] authorization OK')
+            console.log('[wss] handle upgrade')
             wss.handleUpgrade(req, socket, head, (ws) => {
+              console.log('[Server] connection callback')
               wss.emit('connection', ws, req);
             });
           }
         });
       } else {
+        console.log('[wss] handle upgrade')
         wss.handleUpgrade(req, socket, head, (ws) => {
+          console.log('[Server] connection callback')
           wss.emit('connection', ws, req);
         });
       }
@@ -61,7 +72,9 @@ export class Server extends EventEmitter {
   }
 
   private onNewConnection(socket: WebSocket, req: IncomingMessage) {
+    console.log('[wss] new connection', socket, req.url)
     const cpId = Server.getCpIdFromUrl(req.url);
+    console.log('[wss] extracted id', cpId)
     if (!socket.protocol || !cpId) {
       // From Spec: If the Central System does not agree to using one of the subprotocols offered
       // by the client, it MUST complete the WebSocket handshake with a response without a
