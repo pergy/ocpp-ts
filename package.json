@@ -1,13 +1,17 @@
 {
   "name": "@pergy/ocpp-ts",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "OCPP 1.6: Open Charge Point Protocol",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
     "compileSchema": "npx ts-node scripts/compileSchemas.ts",
-    "prepublish": "npm run build",
-    "build": "rm -rf ./dist/ && tsc",
+    "prepublishOnly": "npm run rebuild",
+    "build": "tsc",
+    "clean": "npm i run-script-os --no-package-lock --no-save && run-script-os",
+    "clean:win32": "del /f/q dist",
+    "clean:default": "rm -rf dist",
+    "rebuild": "npm run clean & npm run build",
     "test": "jest"
   },
   "keywords": [
@@ -24,27 +28,25 @@
   },
   "homepage": "https://github.com/sepych/ocpp-ts",
   "dependencies": {
-    "ajv": "^6.12.6",
-    "uuid": "^8.3.2",
-    "ws": "^8.3.0"
+    "ajv": "^8.17.1",
+    "uuid": "^11.0.5",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.16.5",
-    "@babel/preset-env": "^7.16.5",
-    "@babel/preset-typescript": "^7.16.5",
-    "@types/jest": "^27.0.3",
-    "@types/uuid": "^8.3.3",
-    "@types/ws": "^8.2.2",
-    "@typescript-eslint/eslint-plugin": "^5.7.0",
-    "@typescript-eslint/parser": "^5.7.0",
-    "babel-jest": "^27.4.5",
-    "directory-tree": "^3.0.1",
-    "eslint": "^8.4.1",
-    "eslint-config-airbnb": "^19.0.2",
-    "eslint-config-airbnb-typescript": "^16.1.0",
-    "jest": "^27.4.5",
-    "json-schema-to-typescript": "^10.1.5",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.4"
+    "@babel/core": "^7.26.7",
+    "@babel/preset-env": "^7.26.7",
+    "@babel/preset-typescript": "^7.26.0",
+    "@types/jest": "^29.5.14",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.14",
+    "@typescript-eslint/eslint-plugin": "^8.22.0",
+    "@typescript-eslint/parser": "^8.22.0",
+    "babel-jest": "^29.7.0",
+    "directory-tree": "^3.5.2",
+    "eslint": "^9.19.0",
+    "jest": "^29.7.0",
+    "json-schema-to-typescript": "^15.0.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
   }
 }
