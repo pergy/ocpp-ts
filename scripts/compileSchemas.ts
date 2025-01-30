@@ -1,5 +1,5 @@
 // const j2ts = require('json-schema-to-typescript');
-import j2ts from 'json-schema-to-typescript';
+import * as j2ts from 'json-schema-to-typescript';
 import directoryTree from "directory-tree";
 // const directoryTree = require('directory-tree');
 import fs from 'fs';
